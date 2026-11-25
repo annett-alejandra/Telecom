@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: ${DB_USERNAME:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${BIND_HOST:-127.0.0.1}:${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -36,9 +36,9 @@ services:
     environment:
       APP_NAME: "TELCOM 2.0"
       APP_ENV: ${APP_ENV:-local}
-      APP_DEBUG: "true"
+      APP_DEBUG: ${APP_DEBUG:-true}
       APP_KEY: ${APP_KEY:-base64:xY2F2lF4smNPRzcrUPktNIoAHrOuFOrP/dxj07jO+uE=}
-      APP_URL: http://localhost:8000
+      APP_URL: ${APP_URL:-http://localhost:8000}
       PORT: 8000
       DB_CONNECTION: pgsql
       DB_HOST: db
@@ -48,10 +48,14 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       SESSION_DRIVER: database
       CACHE_STORE: database
-      RUN_MIGRATIONS: "true"
-      RUN_SEEDERS: "true"
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+      RUN_SEEDERS: ${RUN_SEEDERS:-true}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
+      GEMINI_TIMEOUT: ${GEMINI_TIMEOUT:-20}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
     ports:
-      - "8000:8000"
+      - "${BIND_HOST:-127.0.0.1}:${BACKEND_PORT:-8000}:8000"
     volumes:
       - backend_storage:/app/storage
     networks:
@@ -65,12 +69,12 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: http://localhost:8000/api
+        VITE_API_URL: ${VITE_API_URL:-/api}
     restart: unless-stopped
     depends_on:
       - backend
     ports:
-      - "5173:80"
+      - "${FRONTEND_PORT:-5173}:80"
     networks:
       - telcom-network
 
